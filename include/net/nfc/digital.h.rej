@@ -1,0 +1,10 @@
+--- include/net/nfc/digital.h
++++ include/net/nfc/digital.h
+@@ -35,6 +35,7 @@
+ 	NFC_DIGITAL_RF_TECH_106A = 0,
+ 	NFC_DIGITAL_RF_TECH_212F,
+ 	NFC_DIGITAL_RF_TECH_424F,
++	NFC_DIGITAL_RF_TECH_ISO15693,
+ 
+ 	NFC_DIGITAL_RF_TECH_LAST,
+ };

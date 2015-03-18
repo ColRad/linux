@@ -1,0 +1,38 @@
+--- net/nfc/nci/ntf.c
++++ net/nfc/nci/ntf.c
+@@ -198,12 +198,14 @@
+ 	struct rf_tech_specific_params_nfca_poll *nfca_poll;
+ 	struct rf_tech_specific_params_nfcb_poll *nfcb_poll;
+ 	struct rf_tech_specific_params_nfcf_poll *nfcf_poll;
++	struct rf_tech_specific_params_nfcf_listen *nfcf_listen;
+ 	struct rf_tech_specific_params_nfcv_poll *nfcv_poll;
+ 	__u32 protocol;
+ 
+ 	if (rf_protocol == NCI_RF_PROTOCOL_T1T)
+ 		protocol = NFC_PROTO_JEWEL_MASK;
+-	else if (rf_protocol == NCI_RF_PROTOCOL_T2T)
++	else if ((rf_protocol == NCI_RF_PROTOCOL_T2T) ||
++			(rf_protocol == NCI_RF_PROTOCOL_MIFARE_CLASSIC))
+ 		protocol = NFC_PROTO_MIFARE_MASK;
+ 	else if (rf_protocol == NCI_RF_PROTOCOL_ISO_DEP)
+ 		if (rf_tech_and_mode == NCI_NFC_A_PASSIVE_POLL_MODE)
+@@ -252,6 +256,19 @@
+ 			memcpy(target->sensf_res, nfcf_poll->sensf_res,
+ 			       target->sensf_res_len);
+ 		}
++	} else if ((rf_tech_and_mode == NCI_NFC_A_PASSIVE_LISTEN_MODE) ||
++		   (rf_tech_and_mode == NCI_NFC_A_ACTIVE_LISTEN_MODE)) {
++		/* Nothing to do */
++	} else if ((rf_tech_and_mode == NCI_NFC_F_PASSIVE_LISTEN_MODE) ||
++		  (rf_tech_and_mode == NCI_NFC_F_ACTIVE_LISTEN_MODE)) {
++		nfcf_listen =
++			(struct rf_tech_specific_params_nfcf_listen *)params;
++
++		target->nfcid2_len = nfcf_listen->local_nfcid2_len;
++		if (target->nfcid2_len > 0) {
++			memcpy(target->nfcid2, nfcf_listen->local_nfcid2,
++			       target->nfcid2_len);
++		}
+ 	} else if (rf_tech_and_mode == NCI_NFC_V_PASSIVE_POLL_MODE) {
+ 		nfcv_poll = (struct rf_tech_specific_params_nfcv_poll *)params;
+ 

@@ -1,0 +1,17 @@
+--- include/net/nfc/nci.h
++++ include/net/nfc/nci.h
+@@ -121,12 +121,14 @@
+ #define NCI_RF_PROTOCOL_ISO_DEP					0x04
+ #define NCI_RF_PROTOCOL_NFC_DEP					0x05
+ #define NCI_RF_PROTOCOL_T5T					0x06
++#define NCI_RF_PROTOCOL_MIFARE_CLASSIC				0x80
+ 
+ /* NCI RF Interfaces */
+ #define NCI_RF_INTERFACE_NFCEE_DIRECT				0x00
+ #define NCI_RF_INTERFACE_FRAME					0x01
+ #define NCI_RF_INTERFACE_ISO_DEP				0x02
+ #define NCI_RF_INTERFACE_NFC_DEP				0x03
++#define NCI_RF_INTERFACE_TAG_CMD				0x80
+ 
+ /* NCI Configuration Parameter Tags */
+ #define NCI_PN_ATR_REQ_GEN_BYTES				0x29

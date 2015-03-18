@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2011  Intel Corporation. All rights reserved.
+ * Copyright (C) 2014 Marvell International Ltd.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +28,7 @@
 
 static u8 llcp_magic[3] = {0x46, 0x66, 0x6d};
 
-static LIST_HEAD(llcp_devices);
+static struct list_head llcp_devices;
 
 static void nfc_llcp_rx_skb(struct nfc_llcp_local *local, struct sk_buff *skb);
 
@@ -293,9 +294,9 @@ static void nfc_llcp_sdreq_timer(unsigned long data)
 
 struct nfc_llcp_local *nfc_llcp_find_local(struct nfc_dev *dev)
 {
-	struct nfc_llcp_local *local;
+	struct nfc_llcp_local *local, *n;
 
-	list_for_each_entry(local, &llcp_devices, list)
+	list_for_each_entry_safe(local, n, &llcp_devices, list)
 		if (local->dev == dev)
 			return local;
 
@@ -609,16 +610,14 @@ u8 *nfc_llcp_general_bytes(struct nfc_dev *dev, size_t *general_bytes_len)
 
 int nfc_llcp_set_remote_gb(struct nfc_dev *dev, u8 *gb, u8 gb_len)
 {
-	struct nfc_llcp_local *local;
+	struct nfc_llcp_local *local = nfc_llcp_find_local(dev);
 
-	if (gb_len < 3 || gb_len > NFC_MAX_GT_LEN)
-		return -EINVAL;
-
-	local = nfc_llcp_find_local(dev);
 	if (local == NULL) {
 		pr_err("No LLCP device\n");
 		return -ENODEV;
 	}
+	if (gb_len < 3)
+		return -EINVAL;
 
 	memset(local->remote_gb, 0, NFC_MAX_GT_LEN);
 	memcpy(local->remote_gb, gb, gb_len);
@@ -1511,8 +1510,10 @@ int nfc_llcp_data_received(struct nfc_dev *dev, struct sk_buff *skb)
 	struct nfc_llcp_local *local;
 
 	local = nfc_llcp_find_local(dev);
-	if (local == NULL)
+	if (local == NULL) {
+		kfree_skb(skb);
 		return -ENODEV;
+	}
 
 	__nfc_llcp_recv(local, skb);
 
@@ -1625,6 +1626,8 @@ void nfc_llcp_unregister_device(struct nfc_dev *dev)
 
 int __init nfc_llcp_init(void)
 {
+	INIT_LIST_HEAD(&llcp_devices);
+
 	return nfc_llcp_sock_init();
 }
 

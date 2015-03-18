@@ -1,0 +1,1 @@
+- pintctrl-0: Specifies the pin control groups used for this controller.

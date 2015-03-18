@@ -1,0 +1,9 @@
+--- net/nfc/nci/data.c
++++ net/nfc/nci/data.c
+@@ -294,5 +320,5 @@
+ 		skb_trim(skb, (skb->len - 1));
+ 	}
+ 
+-	nci_add_rx_data_frag(ndev, skb, pbf, nci_to_errno(status));
++	nci_add_rx_data_frag(ndev, skb, pbf, conn_id, nci_to_errno(status));
+ }

@@ -1,0 +1,11 @@
+--- include/net/nfc/nci_core.h
++++ include/net/nfc/nci_core.h
+@@ -85,6 +85,8 @@
+ 				    struct sk_buff *skb);
+ 	void  (*hci_cmd_received)(struct nci_dev *ndev, u8 pipe, u8 cmd,
+ 				  struct sk_buff *skb);
++	int (*recv_proprietary_rsp_packet)(struct nci_dev *ndev, u16 opcode,
++					   struct sk_buff *skb);
+ };
+ 
+ #define NCI_MAX_SUPPORTED_RF_INTERFACES		10

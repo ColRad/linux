@@ -45,6 +45,24 @@ static void nfc_sock_unlink(struct nfc_sock_list *l, struct sock *sk)
 	write_unlock(&l->lock);
 }
 
+static struct nfc_sock_list raw_sk_list = {
+	.lock = __RW_LOCK_UNLOCKED(raw_sk_list.lock)
+};
+
+static void nfc_sock_link(struct nfc_sock_list *l, struct sock *sk)
+{
+	write_lock(&l->lock);
+	sk_add_node(sk, &l->head);
+	write_unlock(&l->lock);
+}
+
+static void nfc_sock_unlink(struct nfc_sock_list *l, struct sock *sk)
+{
+	write_lock(&l->lock);
+	sk_del_node_init(sk);
+	write_unlock(&l->lock);
+}
+
 static void rawsock_write_queue_purge(struct sock *sk)
 {
 	pr_debug("sk=%p\n", sk);
@@ -74,6 +92,9 @@ static int rawsock_release(struct socket *sock)
 
 	if (!sk)
 		return 0;
+
+	if (sock->type == SOCK_RAW)
+		nfc_sock_unlink(&raw_sk_list, sk);
 
 	if (sock->type == SOCK_RAW)
 		nfc_sock_unlink(&raw_sk_list, sk);
@@ -292,6 +313,26 @@ static const struct proto_ops rawsock_ops = {
 	.setsockopt     = sock_no_setsockopt,
 	.getsockopt     = sock_no_getsockopt,
 	.sendmsg        = rawsock_sendmsg,
+	.recvmsg        = rawsock_recvmsg,
+	.mmap           = sock_no_mmap,
+};
+
+static const struct proto_ops rawsock_raw_ops = {
+	.family         = PF_NFC,
+	.owner          = THIS_MODULE,
+	.release        = rawsock_release,
+	.bind           = sock_no_bind,
+	.connect        = sock_no_connect,
+	.socketpair     = sock_no_socketpair,
+	.accept         = sock_no_accept,
+	.getname        = sock_no_getname,
+	.poll           = datagram_poll,
+	.ioctl          = sock_no_ioctl,
+	.listen         = sock_no_listen,
+	.shutdown       = sock_no_shutdown,
+	.setsockopt     = sock_no_setsockopt,
+	.getsockopt     = sock_no_getsockopt,
+	.sendmsg        = sock_no_sendmsg,
 	.recvmsg        = rawsock_recvmsg,
 	.mmap           = sock_no_mmap,
 };

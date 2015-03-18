@@ -100,6 +100,11 @@ int nfc_genl_llc_send_sdres(struct nfc_dev *dev, struct hlist_head *sdres_list);
 
 int nfc_genl_se_added(struct nfc_dev *dev, u32 se_idx, u16 type);
 int nfc_genl_se_removed(struct nfc_dev *dev, u32 se_idx);
+int nfc_genl_se_transaction(struct nfc_dev *dev, u8 se_idx,
+			    struct nfc_evt_transaction *evt_transaction);
+
+int nfc_genl_vendor_rsp(struct nfc_dev *dev, u32 vendor_id, u32 vendor_subcmd,
+			u8 data_len, u8* data);
 
 struct nfc_dev *nfc_get_device(unsigned int idx);
 
